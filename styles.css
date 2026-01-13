@@ -5,130 +5,197 @@
     font-style: normal;
 }
 
-#background-video {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    min-width: 100%;
-    min-height: 100%;
-    z-index: -1;
-}
-
-.hidden {
-    display: none;
-}
-
-.button-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 10px; 
-    justify-items: center;
-    margin-top: 20px;
-}
-
-.audio-button {
-    position: relative;
-    font-size: 1.5rem; 
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #050505; /* MTT Manager dark background */
+    background-image:
+        radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(212, 255, 0, 0.08) 0px, transparent 50%);
+    color: #ffffff;
     font-family: 'Code-Pro-Demo', sans-serif;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5); 
-    border: none;
-    border-radius: 10px; 
-    cursor: pointer;
-    width: 100%; 
-    aspect-ratio: 2 / 1;
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    transition: background-color 0.3s ease, transform 0.1s ease; 
+    padding-bottom: 120px; /* Space for fixed volume control */
 }
 
-.audio-button:hover {
-    background-color: rgba(0, 0, 0, 0.7); 
-}
-
-.audio-button.clicked {
-    transform: scale(0.55); 
-}
-
-
+/* --- Banner --- */
 .banner-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px; /* Espace au-dessus de la bannière */
-    position: relative;
+    margin: 30px 0;
+    width: 100%;
 }
 
 .banner-logo {
-    max-width: 100%;
+    max-width: 500px;
+    width: 90%;
     height: auto;
+    filter: drop-shadow(0 0 15px rgba(212, 255, 0, 0.4)); /* Lime glow - MTT Manager style */
 }
 
-.volume {
-    background: #f5f5f5;
-    box-sizing: border-box;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* --- Grid Layout --- */
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px; 
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Audio Buttons --- */
+.audio-button {
+    position: relative;
+    font-size: 1.2rem; 
+    font-family: 'Code-Pro-Demo', sans-serif;
+    color: #ffffff; /* Pure white */
+    background-color: #0F0F11; /* MTT surface color */
+    border: 1px solid #27272A; /* MTT border color */
+    border-radius: 8px; 
+    cursor: pointer;
+    width: 100%; 
+    aspect-ratio: 2.5 / 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    max-width: 400px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    padding: 10px;
+    text-align: center;
+    word-break: break-word;
+}
+
+.audio-button:hover {
+    background-color: #1a1a1c;
+    border-color: #D4FF00;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(212, 255, 0, 0.3); /* Lime neon glow - MTT style */
+    transform: translateY(-2px);
+}
+
+.audio-button:active, .audio-button.clicked {
+    transform: scale(0.95);
+    background-color: #1a1f0a;
+    border-color: #D4FF00;
+    box-shadow: 0 0 10px rgba(212, 255, 0, 0.5);
+}
+
+/* --- Volume Control --- */
+.volume {
+    background: rgba(15, 15, 17, 0.9); /* MTT surface color with transparency */
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    border-radius: 12px;
+    padding: 15px 25px;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid #27272A; /* MTT border color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 90%;
+    max-width: 500px;
     position: fixed;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-  }
-  
-  .volume input[type=range] {
+    z-index: 100;
+}
+
+.volume input[type=range] {
     display: none;
-  }
-  
-  .icon-size {
-    color: #000;
-    font-size: 48px;
-  }
-  
-  .bar-hoverbox {
-    padding: 10px 15px;
-    opacity: 0.7;
+}
+
+.icon-size {
+    color: #D4FF00; /* Lime accent - MTT style */
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.icon-size:hover {
+    color: #e5ff4d;
+}
+
+.bar-hoverbox {
+    padding: 10px 0;
+    opacity: 0.9;
     transition: opacity .2s;
-    
-    &:hover {
-      opacity: 1;
-      cursor: pointer;
-    }
-  }
-  
-  .bar {
-    background: #999;
-    height: 7px;
-    width: 300px;
-    border-radius: 15px;
+    flex-grow: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.bar-hoverbox:hover {
+    opacity: 1;
+}
+
+.bar {
+    background: #27272A; /* MTT border color */
+    height: 6px;
+    width: 100%;
+    border-radius: 3px;
     overflow: hidden;
     pointer-events: none;
-    
-    .bar-fill {
-      background: #000;
-      width: 0%;
-      height: 100%;
-      background-clip: border-box;
-      pointer-events: none;
-    }
-  }
+    position: relative;
+}
 
+.bar-fill {
+    background: #D4FF00; /* Lime fill - MTT style */
+    width: 100%; /* JS will control this */
+    height: 100%;
+    transition: width 0.1s linear;
+}
 
-/* Media queries pour les appareils mobiles */
-@media (max-width: 780px) {
+/* --- Responsive Breakpoints --- */
+
+/* Tablet (Landscape & Portrait) */
+@media (max-width: 1024px) {
     .button-container {
-        grid-template-columns: repeat(2, 1fr); /* Passe à 2 colonnes sur les petits écrans */
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mobile (Landscape & Portrait) */
+@media (max-width: 768px) {
+    .button-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
     }
     
     .audio-button {
-        padding: 8px 16px; /* Réduit le padding pour les petits écrans */
-        font-size: 200%; /* Taille de police constante */
-        line-height: 100%;
-        aspect-ratio: 2 / 1; /* Assure que la hauteur est égale à la largeur */
+        font-size: 1rem;
     }
+    
+    .volume {
+        width: 95%;
+        padding: 12px 20px;
+        bottom: 15px;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .button-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .audio-button {
+        aspect-ratio: auto;
+        padding: 20px 10px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Utility */
+.hidden {
+    display: none;
 }

@@ -5,26 +5,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const icon = document.querySelector(".icon i");
     const audio = document.getElementById("audioPlayer");
     const audioButtons = document.querySelectorAll('.audio-button');
-    var video = document.getElementById('background-video');
-    var source = video.getElementsByTagName('source')[0];
-
-  
+    
+    // Initialize state
     let previousValue = range.value;
     let isMuted = false;
-    let currentVideoId = null;
+    let isMouseDown = false;
   
-    // Fonction pour mettre à jour la barre de volume visuelle
+    // Function to update visual volume bar
     const updateVolumeBar = (value) => {
-        fill.style.width = value + "%";
-        range.value = value; // Mise à jour directe de la valeur du range
-        updateIcon(value);
-        updateAudioVolume(value);
-        console.log(value);
+        // Ensure value is between 0 and 100
+        let safeValue = Math.max(0, Math.min(100, value));
+        
+        fill.style.width = safeValue + "%";
+        range.value = safeValue; 
+        updateIcon(safeValue);
+        updateAudioVolume(safeValue);
     };
   
-    // Fonction pour mettre à jour l'icône du volume en fonction de la valeur
+    // Function to update icon based on volume
     const updateIcon = (value) => {
-        if (value == 0) {
+        // Remove existing classes first to avoid accumulation or conflicts if needed, 
+        // but setting className completely is safer
+        if (value <= 0) {
             icon.className = "fa fa-2x fa-volume-off icon-size";
         } else if (value < 50) {
             icon.className = "fa fa-2x fa-volume-down icon-size";
@@ -33,84 +35,84 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
   
-    // Fonction pour mettre à jour le volume de l'audio en fonction de la valeur du range
+    // Function to update audio element volume
     const updateAudioVolume = (value) => {
         audio.volume = value / 100;
     };
   
-    // Initialiser la barre de volume avec la valeur par défaut du range
+    // Initialize volume
     updateVolumeBar(range.value);
   
-    // Gestion des événements sur le range pour la barre de volume visuelle
+    // Range input event (hidden but technically functional)
     range.addEventListener("input", (e) => {
-        const value = e.target.value;
-        updateVolumeBar(value);
+        updateVolumeBar(e.target.value);
     });
   
-    // Gestion du clic sur l'icône pour activer/désactiver le mode muet
-    icon.addEventListener("click", () => {
+    // Mute toggle on icon click
+    icon.parentElement.addEventListener("click", () => {
         if (isMuted) {
-            // Rétablir le volume précédent avant le mode muet
+            // Unmute
+            if (previousValue <= 0) previousValue = 50; // Default if was 0
             updateVolumeBar(previousValue);
             isMuted = false;
         } else {
-            // Activer le mode muet
+            // Mute
             previousValue = range.value;
             updateVolumeBar(0);
             isMuted = true;
         }
     });
   
-    // Jouer un son et changer le fond du site
+    // Button click handlers for playing sounds
+    audioButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Add animation class
+            this.classList.add('clicked');
+            setTimeout(() => {
+                this.classList.remove('clicked');
+            }, 100);
 
-    audioButtons.forEach(function(button) {
-    button.addEventListener('click', function(event) {
-
-        // Jouer le son correspondant
-        var audioSrc = this.getAttribute('data-src');
-        audioPlayer.src = audioSrc;
-        audioPlayer.play();
-
-         // Vérifier si c'est le même bouton qui a été cliqué
-         if (this.id === currentVideoId) {
-            console.log('La même vidéo est déjà affichée.');
-            return;  // Sortir de la fonction sans rien faire de plus
-        }
-
-        // Mettre à jour l'ID de la vidéo actuellement affichée
-        currentVideoId = this.id;
-
-        // Changer la source vidéo
-        var newVideoFile = event.target.id;
-        source.src = 'Videos/' + newVideoFile + '.mp4';
-        video.load();
-        video.play();
-
-        console.log(newVideoFile);
+            // Play sound
+            const audioSrc = this.getAttribute('data-src');
+            if (audioSrc) {
+                audio.src = audioSrc;
+                // Ensure volume is set correctly before playing
+                audio.volume = range.value / 100;
+                
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error("Audio playback error:", error);
+                    });
+                }
+            }
+        });
     });
-});
-
   
-    // Gestion des événements de la barre de volume visuelle
-    const calculateFill = (e) => {
+    // Volume bar interaction logic
+    const calculateFill = (clientX) => {
         const rect = barHoverBox.getBoundingClientRect();
-        let offsetX = e.clientX - rect.left;
-        const width = rect.width - 30;
-        const newValue = Math.max(Math.min((offsetX - 15) / width * 100.0, 100.0), 0);
-        updateVolumeBar(newValue);
+        // Calculate click position relative to the bar
+        // The bar is inside barHoverBox. barHoverBox might have padding.
+        // Let's use the full width of the hoverbox for interaction to be easier
+        let offsetX = clientX - rect.left;
+        const width = rect.width;
+        
+        let percentage = (offsetX / width) * 100;
+        updateVolumeBar(percentage);
     };
   
-    let isMouseDown = false;
-  
-    // Gestion des événements de la barre de volume pour desktop
+    // Desktop events
     barHoverBox.addEventListener("mousedown", (e) => {
         isMouseDown = true;
-        calculateFill(e);
+        calculateFill(e.clientX);
     });
   
     document.addEventListener("mousemove", (e) => {
         if (isMouseDown) {
-            calculateFill(e);
+            e.preventDefault(); // Prevent selection
+            calculateFill(e.clientX);
         }
     });
   
@@ -118,20 +120,21 @@ document.addEventListener("DOMContentLoaded", () => {
         isMouseDown = false;
     });
   
-    // Gestion des événements de la barre de volume pour mobile
+    // Mobile events
     barHoverBox.addEventListener("touchstart", (e) => {
         isMouseDown = true;
-        calculateFill(e.touches[0]);
+        // e.touches[0] is the first touch
+        calculateFill(e.touches[0].clientX);
     });
   
     barHoverBox.addEventListener("touchmove", (e) => {
         if (isMouseDown) {
-            calculateFill(e.touches[0]);
+            e.preventDefault(); // Prevent scrolling while adjusting volume
+            calculateFill(e.touches[0].clientX);
         }
     });
   
     document.addEventListener("touchend", () => {
         isMouseDown = false;
     });
-  });
-  
+});
